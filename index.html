@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Random Quote Generator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0e0c;
+      --card: #1a1814;
+      --border: #2e2b24;
+      --gold: #c9a84c;
+      --gold-light: #e8c97a;
+      --text: #f0ece2;
+      --muted: #7a7060;
+      --accent: #8b6f3a;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Background texture */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 20%, rgba(201,168,76,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 80% at 80% 80%, rgba(139,111,58,0.05) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Decorative lines */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-image:
+        repeating-linear-gradient(0deg, transparent, transparent 60px, rgba(201,168,76,0.02) 60px, rgba(201,168,76,0.02) 61px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 680px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      animation: fadeDown 0.8s ease both;
+    }
+
+    .header-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.4rem;
+    }
+
+    .header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 400;
+      color: var(--text);
+      letter-spacing: 0.02em;
+    }
+
+    /* Quote Card */
+    .quote-card {
+      width: 100%;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 3rem 3rem 2.5rem;
+      position: relative;
+      animation: fadeUp 0.8s ease 0.2s both;
+      transition: border-color 0.3s;
+    }
+
+    .quote-card:hover {
+      border-color: var(--accent);
+    }
+
+    /* Gold corner accents */
+    .quote-card::before,
+    .quote-card::after {
+      content: '';
+      position: absolute;
+      width: 20px; height: 20px;
+      border-color: var(--gold);
+      border-style: solid;
+    }
+    .quote-card::before {
+      top: 12px; left: 12px;
+      border-width: 1px 0 0 1px;
+    }
+    .quote-card::after {
+      bottom: 12px; right: 12px;
+      border-width: 0 1px 1px 0;
+    }
+
+    .quotemark {
+      font-family: 'Playfair Display', serif;
+      font-size: 5rem;
+      line-height: 0.5;
+      color: var(--gold);
+      opacity: 0.4;
+      display: block;
+      margin-bottom: 1rem;
+      user-select: none;
+    }
+
+    .quote-text {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.15rem, 2.5vw, 1.4rem);
+      font-style: italic;
+      line-height: 1.75;
+      color: var(--text);
+      min-height: 100px;
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+
+    .quote-text.fade-out {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+
+    .divider {
+      width: 40px;
+      height: 1px;
+      background: var(--gold);
+      margin: 1.8rem 0 1rem;
+      opacity: 0.5;
+    }
+
+    .quote-author {
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gold-light);
+      transition: opacity 0.35s ease;
+    }
+
+    .quote-author.fade-out {
+      opacity: 0;
+    }
+
+    /* Category tag */
+    .quote-category {
+      display: inline-block;
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: rgba(201,168,76,0.07);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 0.2rem 0.6rem;
+      margin-top: 0.8rem;
+    }
+
+    /* Button */
+    .btn-new {
+      background: transparent;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      padding: 0.85rem 2.5rem;
+      cursor: pointer;
+      border-radius: 2px;
+      position: relative;
+      overflow: hidden;
+      transition: color 0.3s, background 0.3s;
+      animation: fadeUp 0.8s ease 0.4s both;
+    }
+
+    .btn-new::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--gold);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s ease;
+      z-index: -1;
+    }
+
+    .btn-new:hover {
+      color: var(--bg);
+    }
+
+    .btn-new:hover::before {
+      transform: scaleX(1);
+    }
+
+    .btn-new:active {
+      transform: scale(0.97);
+    }
+
+    /* Counter */
+    .counter {
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      animation: fadeUp 0.8s ease 0.5s both;
+    }
+
+    /* Animations */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <p class="header-label">Daily Inspiration</p>
+    <h1>Random Quote Generator</h1>
+  </div>
+
+  <div class="quote-card">
+    <span class="quotemark">"</span>
+    <p class="quote-text" id="quoteText">Loading quote...</p>
+    <div class="divider"></div>
+    <p class="quote-author" id="quoteAuthor">— Author</p>
+    <span class="quote-category" id="quoteCategory">Category</span>
+  </div>
+
+  <button class="btn-new" onclick="newQuote()">✦ New Quote</button>
+
+  <p class="counter" id="counter">Quote 1 of 20</p>
+
+</div>
+
+<script>
+  const quotes = [
+    { text: "The only way to do great work is to love what you do.", author: "Steve Jobs", category: "Work" },
+    { text: "In the middle of every difficulty lies opportunity.", author: "Albert Einstein", category: "Resilience" },
+    { text: "It does not matter how slowly you go as long as you do not stop.", author: "Confucius", category: "Persistence" },
+    { text: "Life is what happens when you're busy making other plans.", author: "John Lennon", category: "Life" },
+    { text: "The future belongs to those who believe in the beauty of their dreams.", author: "Eleanor Roosevelt", category: "Dreams" },
+    { text: "Strive not to be a success, but rather to be of value.", author: "Albert Einstein", category: "Success" },
+    { text: "You miss 100% of the shots you don't take.", author: "Wayne Gretzky", category: "Courage" },
+    { text: "Whether you think you can or you think you can't, you're right.", author: "Henry Ford", category: "Mindset" },
+    { text: "The best time to plant a tree was 20 years ago. The second best time is now.", author: "Chinese Proverb", category: "Action" },
+    { text: "An unexamined life is not worth living.", author: "Socrates", category: "Philosophy" },
+    { text: "Spread love everywhere you go. Let no one ever come to you without leaving happier.", author: "Mother Teresa", category: "Love" },
+    { text: "When you reach the end of your rope, tie a knot in it and hang on.", author: "Franklin D. Roosevelt", category: "Resilience" },
+    { text: "Always remember that you are absolutely unique. Just like everyone else.", author: "Margaret Mead", category: "Humor" },
+    { text: "Do not go where the path may lead, go instead where there is no path and leave a trail.", author: "Ralph Waldo Emerson", category: "Leadership" },
+    { text: "You will face many defeats in life, but never let yourself be defeated.", author: "Maya Angelou", category: "Strength" },
+    { text: "The greatest glory in living lies not in never falling, but in rising every time we fall.", author: "Nelson Mandela", category: "Resilience" },
+    { text: "In the end, it's not the years in your life that count. It's the life in your years.", author: "Abraham Lincoln", category: "Life" },
+    { text: "Never let the fear of striking out keep you from playing the game.", author: "Babe Ruth", category: "Courage" },
+    { text: "Life is either a daring adventure or nothing at all.", author: "Helen Keller", category: "Adventure" },
+    { text: "Many of life's failures are people who did not realize how close they were to success when they gave up.", author: "Thomas A. Edison", category: "Persistence" },
+  ];
+
+  let currentIndex = -1;
+
+  function newQuote() {
+    const textEl   = document.getElementById('quoteText');
+    const authorEl = document.getElementById('quoteAuthor');
+    const catEl    = document.getElementById('quoteCategory');
+    const counter  = document.getElementById('counter');
+
+    // Fade out
+    textEl.classList.add('fade-out');
+    authorEl.classList.add('fade-out');
+
+    setTimeout(() => {
+      // Pick a different random quote
+      let newIndex;
+      do { newIndex = Math.floor(Math.random() * quotes.length); }
+      while (newIndex === currentIndex);
+      currentIndex = newIndex;
+
+      const q = quotes[currentIndex];
+      textEl.textContent   = q.text;
+      authorEl.textContent = '— ' + q.author;
+      catEl.textContent    = q.category;
+      counter.textContent  = `Quote ${currentIndex + 1} of ${quotes.length}`;
+
+      // Fade in
+      textEl.classList.remove('fade-out');
+      authorEl.classList.remove('fade-out');
+    }, 350);
+  }
+
+  // Load first quote on page open
+  newQuote();
+</script>
+
+</body>
+</html>
